@@ -16,7 +16,11 @@ def get_datasets(directory):
     datasets = sorted(set(band_files))
     return datasets
 
-def generate_landsat_rgb_image(file_name, r_index=1, g_index=2, b_index=3, save=True, show=True):
+def generate_landsat_rgb_image(file_name, r_index=1, g_index=2, b_index=3):
+    '''
+        Create a false color rgb image based on the specified bands.
+    '''
+    
     r = plt.imread(f'{file_name}{r_index}.TIF')
     g = plt.imread(f'{file_name}{g_index}.TIF')
     b = plt.imread(f'{file_name}{b_index}.TIF')
@@ -28,13 +32,18 @@ def generate_landsat_rgb_image(file_name, r_index=1, g_index=2, b_index=3, save=
     width, height = r.shape
 
     pixels = np.ndarray((width, height, 3))
+
+    pixels[:, :, 0] = r 
+    pixels[:, :, 1] = g 
+    pixels[:, :, 2] = b 
+
     return pixels
 
-def image_fft(pixels):
-    fft_pixels = np.fft.fft2(pixels, axes=(0,1))
-    return fft_pixels
-
 def gaussian_kernel(width : int, height : int, sigma : float = 1):
+    '''
+        Constructs a Gaussian kernel in the spatial domain
+    '''
+
     x = [i + 0.5 - width/2  for i in range(width)]
     y = [i + 0.5 - height/2 for i in range(height)]
     x, y = np.meshgrid(x, y)

@@ -9,18 +9,21 @@ if __name__ == '__main__':
     # === Pre-process Combined Images === #
     # =================================== #
 
-    # t0 = time.perf_counter()
-    # datasets = ipt.get_datasets('../local')    
-    # print(datasets)
-    # t1 = time.perf_counter()
-    # print(f'Getting datasets took {t1-t0}s')
+    t0 = time.perf_counter()
+    datasets = ipt.get_datasets('../local')    
+    print(datasets)
+    t1 = time.perf_counter()
+    print(f'Getting datasets took {t1-t0}s')
 
-    # t0 = time.perf_counter()
-    # for dataset in datasets:
-    #     ipt.generate_landsat_rgb_image(dataset, r_index=1, g_index=2, b_index=3, save=False, show=True)
-    # t1 = time.perf_counter()
-    # print(f'Generating rgb image took {t1-t0}s')
+    t0 = time.perf_counter()
+    images = []
+    for dataset in datasets:
+        images.append(ipt.generate_landsat_rgb_image(dataset, r_index=6, g_index=5, b_index=2))
+    t1 = time.perf_counter()
+    print(f'Generating rgb image took {t1-t0}s')
 
+    plt.imshow(images[0])
+    plt.show()
 
 
     # ================== #
