@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import image_processing_tools as ipt
 import numpy as np
+import time
 
 if __name__ == '__main__':
 
@@ -8,11 +9,49 @@ if __name__ == '__main__':
     # === Pre-process Combined Images === #
     # =================================== #
 
-    datasets = ipt.get_datasets()    
-    print(datasets)
+    # t0 = time.perf_counter()
+    # datasets = ipt.get_datasets('../local')    
+    # print(datasets)
+    # t1 = time.perf_counter()
+    # print(f'Getting datasets took {t1-t0}s')
 
-    for dataset in datasets:
-        ipt.generate_landsat_rgb_image(dataset, r_index=1, g_index=2, b_index=3, save=False, show=True)
+    # t0 = time.perf_counter()
+    # for dataset in datasets:
+    #     ipt.generate_landsat_rgb_image(dataset, r_index=1, g_index=2, b_index=3, save=False, show=True)
+    # t1 = time.perf_counter()
+    # print(f'Generating rgb image took {t1-t0}s')
+
+
+
+    # ================== #
+    # === Load image === #
+    # ================== #
+
+    #t0 = time.perf_counter()
+    pixels = plt.imread('../local/voiture_bleue.jpg')
+    if pixels.dtype != np.float32 and pixels.dtype != np.float64:
+        pixels = pixels / 255.0
+    width, height, channels = pixels.shape
+
+    #t1 = time.perf_counter()
+    print(f'Loaded image with dimensions: {width}, {height}, {channels}')
+    #print(f'Reading image took {t1-t0:.3f}s')
+
+
+
+    # =================== #
+    # === Convolution === #
+    # =================== #
+    
+    t0 = time.perf_counter()
+    kernel = ipt.gaussian_kernel(3, 3, 1)
+    convolution = ipt.fft_convolve(pixels, kernel)
+    t1 = time.perf_counter()
+    print(f'Taking Fourier transform took {t1-t0:.3f}s')    
+    plt.imshow(convolution)
+    plt.show()
+    
+
 
     # ============================== #
     # === Manual Color Filtering === #
@@ -25,16 +64,11 @@ if __name__ == '__main__':
     fire_min  = np.array([0.500, 0.210, 0.135])
     fire_max  = np.array([1.000, 0.270, 0.160])
 
-    pixels = plt.imread('CombinedImage.png')
-    width, height, channels = pixels.shape
-
-    pixels = pixels[:,:,0:3]
-    
     brown = ipt.filter_color(pixels, brown_min, brown_max)
     blue  = ipt.filter_color(pixels, blue_min, blue_max)
     fires = ipt.filter_color(pixels, fire_min, fire_max)
 
-    # fig, ax = plt.subplots(2,2)
+    fig, ax = plt.subplots(2,2)
     # ax[0,0].imshow(brown)
     # ax[0,1].imshow(blue)
     # ax[1,0].imshow(fires)

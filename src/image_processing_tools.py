@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 import matplotlib.pyplot as plt
 import glob
 import os
@@ -20,12 +21,64 @@ def generate_landsat_rgb_image(file_name, r_index=1, g_index=2, b_index=3, save=
     g = plt.imread(f'{file_name}{g_index}.TIF')
     b = plt.imread(f'{file_name}{b_index}.TIF')
 
-    r /= MAX_UINT16
-    g /= MAX_UINT16
-    b /= MAX_UINT16
+    r = r / MAX_UINT16
+    g = g / MAX_UINT16
+    b = b / MAX_UINT16
 
-    pixels = np.ndarray()
+    width, height = r.shape
+
+    pixels = np.ndarray((width, height, 3))
     return pixels
+
+def image_fft(pixels):
+    fft_pixels = np.fft.fft2(pixels, axes=(0,1))
+    return fft_pixels
+
+def gaussian_kernel(width : int, height : int, sigma : float = 1):
+    x = [i + 0.5 - width/2  for i in range(width)]
+    y = [i + 0.5 - height/2 for i in range(height)]
+    x, y = np.meshgrid(x, y)
+    
+    kernel = np.exp(-(x**2 + y**2) / (2 * sigma**2))
+    kernel /= np.sum(kernel) # normalization
+
+    return kernel
+
+
+def fft_convolve(pixels, kernel):
+    '''
+        Takes the convolution of an image by using the fast fourier transform
+        to speed up the computation
+    '''
+
+    image_width, image_height, channels = pixels.shape
+    kernel_width, kernel_height = kernel.shape
+
+    # prepare the kernel for convolution: pad with zeros, and center
+    padded_kernel = np.zeros((image_width, image_height))
+    start_height = (image_height - kernel_height) // 2
+    start_width  = (image_width  - kernel_width ) // 2
+    padded_kernel[start_width:start_width+kernel_width, start_height:start_height+kernel_height] = kernel
+    padded_kernel = np.fft.fftshift(padded_kernel)
+
+    # take the fourier transform 
+    fft_pixels = np.fft.fft2(pixels, axes=(0,1))
+    fft_kernel = np.fft.fft2(padded_kernel, axes=(0,1))
+
+    # convolution time 
+    fft_convolution = np.zeros_like(fft_pixels)
+    convolution = np.zeros_like(pixels)
+    for i in range(channels):
+        fft_convolution[:, :, i] = fft_pixels[:, :, i] * fft_kernel
+        convolution[:, :, i] = np.fft.ifft2(fft_convolution[:, :, i]).real
+    convolution = (convolution - convolution.min()) / (convolution.max() - convolution.min())
+    
+    return convolution
+
+
+
+
+# ======================================================================================================
 
 def gen_image():
     band_1 = plt.imread('LC08_L2SP_227065_20240822_20240830_02_T1_SR_B1.TIF')
