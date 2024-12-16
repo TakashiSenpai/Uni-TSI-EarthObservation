@@ -7,14 +7,31 @@ import os
 MAX_UINT16 = np.iinfo(np.uint16).max
 
 def get_datasets(directory):
+    '''
+        Scans the specified directory for TIF files and returns
+        the set of dataset identifiers.
+
+        Image files have the identifier BX, where X is the band 
+        index. The dataset identifiers are stripped of the file
+        extension and band index.
+    '''
+    old_dir = os.getcwd()
     os.chdir(directory)
     tif_files = glob.glob('*.TIF')
     band_files = []
     for file in tif_files:
         if 'B' in file:
-            band_files.append(file[:-5])
+            band_files.append(directory + file[:-5])
     datasets = sorted(set(band_files))
+    os.chdir(old_dir)
     return datasets
+
+def get_image_files(directory):
+    old_dir = os.getcwd()
+    os.chdir(directory)
+    files = glob.glob('*.png')
+    os.chdir(old_dir)
+    return files
 
 def generate_landsat_rgb_image(file_name, r_index=1, g_index=2, b_index=3):
     '''
@@ -38,6 +55,7 @@ def generate_landsat_rgb_image(file_name, r_index=1, g_index=2, b_index=3):
     pixels[:, :, 2] = b 
 
     return pixels
+
 
 def gaussian_kernel(width : int, height : int, sigma : float = 1):
     '''
@@ -83,8 +101,6 @@ def fft_convolve(pixels, kernel):
     convolution = (convolution - convolution.min()) / (convolution.max() - convolution.min())
     
     return convolution
-
-
 
 
 # ======================================================================================================
