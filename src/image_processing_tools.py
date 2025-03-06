@@ -102,6 +102,10 @@ def fft_convolve(pixels, kernel):
     
     return convolution
 
+def rgb2gray(im : np.ndarray) -> np.ndarray: 
+    im_gray = np.zeros(im.shape[0:2])
+    im_gray = 0.299 * im[:,:,0] + 0.587 * im[:,:,1] + 0.114 * im[:,:,2]
+    return im_gray
 
 # ======================================================================================================
 

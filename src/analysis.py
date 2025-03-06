@@ -99,6 +99,7 @@ if __name__ == '__main__':
     # === Analyse color space === #
     # =========================== #
 
+    '''
     for i in range(10):
         h = downsampled_HSV_images[i][:,:,0] * 360
         s = downsampled_HSV_images[i][:,:,1]
@@ -116,7 +117,6 @@ if __name__ == '__main__':
         ax.scatter(theta, r, c=downsampled_RGB_images[i].reshape(-1, 3), marker='.')
     plt.show()
 
-    '''
     fig, ax = plt.subplots(1, 3)
     fig.suptitle('Color space')
 
@@ -137,13 +137,13 @@ if __name__ == '__main__':
     ax[2].set_ylabel('Value')
     ax[2].set_xlim(0, 1)
     ax[2].set_ylim(0, 1)
-    '''
 
     fig, ax = plt.subplots()
     ax.scatter(h, v, c=downsampled_RGB_images[0].reshape(-1, 3), s=1, rasterized=True)
     ax.set_xlabel('Hue')
     ax.set_ylabel('Value')
     plt.show()
+    '''
 
 
 
@@ -174,10 +174,14 @@ if __name__ == '__main__':
     fire_min  = np.array([0.500, 0.210, 0.135])
     fire_max  = np.array([1.000, 0.270, 0.160])
 
-    pixels = downsampled_RGB_images[0]
+    pixels = downsampled_RGB_images[5]
     brown = ipt.filter_color(pixels, brown_min, brown_max)
     blue  = ipt.filter_color(pixels, blue_min, blue_max)
     fires = ipt.filter_color(pixels, fire_min, fire_max)
+
+    plt.imsave('filtered_original.png', pixels)
+    plt.imsave('filtered_burnt.png', np.expand_dims(brown, axis=-1))
+    plt.imsave('filtered_river.png', np.expand_dims(blue, axis=-1))
 
     fig, ax = plt.subplots(2,2)
     ax[0,0].imshow(brown)
